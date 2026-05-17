@@ -1,55 +1,38 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Login from "./components/Auth/Login";
-import Dashboard from "./components/Dashboard/Dashboard";
-import CoursesList from "./components/Courses/CoursesList";
-import GradeForm from "./components/Grades/GradeForm";
-import ScheduleView from "./components/Schedule/ScheduleView";
-import Profile from "./components/Profile/Profile";
+import { lazy, Suspense } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import Layout from './components/Layout';
+import PageSpinner from './components/common/PageSpinner';
+import NotFound from './components/common/NotFound';
+import ProtectedRoute, { PublicOnlyRoute } from './routes/ProtectedRoute';
+
+const Login = lazy(() => import('./components/Auth/Login'));
+const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
+const CoursesList = lazy(() => import('./components/Courses/CoursesList'));
+const GradeForm = lazy(() => import('./components/Grades/GradeForm'));
+const ScheduleView = lazy(() => import('./components/Schedule/ScheduleView'));
+const Profile = lazy(() => import('./components/Profile/Profile'));
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('facultyAuth') === 'true';
-  });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      localStorage.setItem('facultyAuth', 'true');
-    } else {
-      localStorage.removeItem('facultyAuth');
-    }
-  }, [isAuthenticated]);
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {isAuthenticated && <Navbar />}
+    <Suspense fallback={<PageSpinner />}>
       <Routes>
-        <Route
-          path="/"
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login setIsAuthenticated={setIsAuthenticated} />}
-        />
-        <Route
-          path="/dashboard"
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/courses"
-          element={isAuthenticated ? <CoursesList /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/grades"
-          element={isAuthenticated ? <GradeForm /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/schedule"
-          element={isAuthenticated ? <ScheduleView /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/profile"
-          element={isAuthenticated ? <Profile /> : <Navigate to="/" />}
-        />
+        <Route element={<PublicOnlyRoute />}>
+          <Route path="/login" element={<Login />} />
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/courses" element={<CoursesList />} />
+            <Route path="/grades" element={<GradeForm />} />
+            <Route path="/schedule" element={<ScheduleView />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </div>
+    </Suspense>
   );
 }
