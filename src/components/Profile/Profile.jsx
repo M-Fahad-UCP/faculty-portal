@@ -107,7 +107,7 @@ export default function Profile() {
             initial={{ scale: 0.92, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="grid h-24 w-24 place-items-center rounded-full border-4 border-white bg-gradient-to-br from-blue-100 to-indigo-100 text-2xl font-bold text-blue-700 shadow-lg"
+            className="relative z-10 grid h-24 w-24 place-items-center rounded-full border-4 border-white bg-gradient-to-br from-blue-100 to-indigo-100 text-2xl font-bold text-blue-700 shadow-lg"
             aria-hidden
           >
             {initials}
